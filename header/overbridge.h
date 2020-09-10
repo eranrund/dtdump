@@ -136,7 +136,8 @@
 #include "stdbool.h"
 #include "stdint.h"
 
-#define TRANSFER_WAV_DATA_SIZE 2016
+//#define TRANSFER_WAV_DATA_SIZE 2016 // 168 * 12 == 24 blocks * 7 samples per block * 12 channels
+#define TRANSFER_WAV_DATA_SIZE (128 * 7 * 12)
 
 typedef enum {
 	OVERBRIDGE_OK = 0,

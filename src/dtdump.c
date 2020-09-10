@@ -120,6 +120,7 @@ int main(int argc, char *argv[]) {
 	clock_t newclk = 0;
 	int32_t wavd[TRANSFER_WAV_DATA_SIZE];
 	while (!shtdwn) {
+        usleep(10000);
 		get_overbridge_wav_data(wavd);
 		if (multiplefiles) {
 			int32_t deinterleaved[TRANSFER_WAV_DATA_SIZE];

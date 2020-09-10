@@ -33,8 +33,9 @@
 #define AHMK2_PID 0x0016
 #define DKEYS_PID 0x001c
 
-#define TRANSFER_OUT_DATA_SIZE 2112
-#define TRANSFER_IN_DATA_SIZE 8832
+#define TRANSFER_OUT_DATA_SIZE 5632// 2112
+//#define TRANSFER_IN_DATA_SIZE 8832 // 24 blocks
+#define TRANSFER_IN_DATA_SIZE 47104 // 128 blocks
 
 
 static libusb_device_handle* digit;
@@ -99,6 +100,7 @@ static void fill_dummy_data() {
 	}
 }
 
+uint32_t kkk=0;
 static void save_data() {
 	// store sample data in tmp buf
 	uint32_t len = sizeof(in_data) / 4;
@@ -110,15 +112,19 @@ static void save_data() {
 	static uint16_t lastts;
 	uint16_t ts;
 	ts = ntohs(((uint16_t*) in_data)[1]);
+    //printf("%d %d\n", ts, ts - lastts);
 	if (first) {
 		first = 0;
 	} else {
-		if (((uint16_t) (ts - lastts)) > 168) {
+		if (((uint16_t) (ts - lastts)) > 896) { // 24 * 7 vs 128 * 7
+            printf("%d %d %d %d\n", kkk, ts, lastts, ts-lastts);
 			xruns++;
 		}
 	}
+    kkk++;
 	lastts = ts;
 	qdata = message_queue_message_alloc(&queue);
+    int lol = 0;
 	if (qdata) {
 	while (pos < len) {
 			pos += 0x08;	// skip header (8 * uint32_t)
@@ -130,6 +136,7 @@ static void save_data() {
 		}
 		message_queue_write(&queue, qdata);
 	}
+    memset(in_data, 0, sizeof(in_data));
 }
 
 static int receive_done = 0;
@@ -139,7 +146,7 @@ static void LIBUSB_CALL cb_xfr_in(struct libusb_transfer *xfr) {
 		save_data();
 		// receive_done = 1; // mark receive done
 	} else {
-		//	printf("x");
+			printf("x");
 	}
 	// start new cycle even if this one did not succeed
 	prepare_cycle_in();
